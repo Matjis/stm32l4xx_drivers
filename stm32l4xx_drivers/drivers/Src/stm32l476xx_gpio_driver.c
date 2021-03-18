@@ -57,18 +57,98 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle){
 
 	uint32_t temp=0; // temp register
 
-	// 1) configure the mode of input mode
+	// 1) configure the input mode
 
 	if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode <= GPIO_MODE_ANALOG){
 		temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinMode << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber)); // multiplication by 2 for pin number means that mode register is 2 bit in size
 		pGPIOHandle->pGPIOx->MODER &= ~( 0x3 << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber) ); // clearing register
 		pGPIOHandle->pGPIOx->MODER |= temp; // setting register
+		temp = 0;
 	}
 	else{
+		temp = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber % 32;
+
+		//interupt config part
+
+		if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IT_FT){
+			if(pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber < 32){
+				//1. configure the FTSR - falling trigger selection register
+				EXTI->FTSR1 |= (1 << temp);
+
+				//clear the corresponding RTSR bit
+				EXTI->RTSR1 &= ~(1 << temp);
+
+				temp = 0;
+			}
+			else{
+				//1. configure the FTSR - falling trigger selection register
+				EXTI->FTSR2 |= (1 << temp);
+
+				//clear the corresponding RTSR bit
+				EXTI->RTSR2 &= ~(1 << temp);
+
+				temp = 0;
+			}
+		}
+		else if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IT_RT){
+			if(pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber < 32){
+				//1. configure the RTSR - rising trigger selection register
+				EXTI->RTSR1 |= (1 << temp);
+
+				//clear the corresponding RTSR bit
+				EXTI->FTSR1 &= ~(1 << temp);
+
+				temp = 0;
+			}
+			else{
+				//1. configure the RTSR - rising trigger selection register
+				EXTI->RTSR2 |= (1 << temp);
+
+				//clear the corresponding RTSR bit
+				EXTI->FTSR2 &= ~(1 << temp);
+
+				temp = 0;
+			}
+		}
+		else if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IT_RFT){
+			if(pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber < 32){
+				//1. configure both FTSR and RTSR - falling and rising trigger selection register
+				EXTI->FTSR1 |= (1 << temp);
+				EXTI->RTSR1 |= (1 << temp);
+
+				temp = 0;
+			}
+			else{
+				//1. configure both FTSR and RTSR - falling and rising trigger selection register
+				EXTI->FTSR2 |= (1 << temp);
+				EXTI->RTSR2 |= (1 << temp);
+
+				temp = 0;
+
+			}
+		}
+
+		//2. configure the GPIO port selection in SYSCFG_EXTICR
+
+		uint8_t temp1 = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber /4;
+		uint8_t temp2 = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber %4;
+		uint8_t portCode = GPIO_BASEADDR_TO_CODE(pGPIOHandle->pGPIOx);
+		SYSCFG_PCLK_EN();
+		SYSCFG->EXTICR[temp1] = portCode << ( temp2 * 4);
+
+
+		//3. enable the exti interrupt delivery using IMR - interrupt mask register
+
+		if(pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber < 32){
+			EXTI->IMR1 |= 1 << temp;
+		}
+		else{
+			EXTI->IMR2 |= 1 << temp;
+		}
 
 	}
 
-	temp = 0;
+	//temp = 0;
 
 	// 2) configure the speed
 
@@ -246,6 +326,21 @@ void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t PinNumber){
 }
 
 
-//IRQ configuration and ISR handling
+/*********************************************************************
+ * @fn      		  - GPIO_IRQConfig
+ *
+ * @brief             - This function does IRQ configuration and ISR handling
+ *
+ * @param[in]         - IRQ number from vector table for specific EXTI line
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -  0 or 1
+ *
+ * @Note              -  none
+ */
+
 void GPIO_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi);
+
+
 void GPIO_IRQHandling(uint8_t PinNumber);

@@ -59,9 +59,9 @@ typedef struct{
 #define GPIO_MODE_OUT 1 // Output mode
 #define GPIO_MODE_ALTFN 2
 #define GPIO_MODE_ANALOG 3
-#define GPIO_MODE_IT_FT 4 // Input mode trigger falling edge
-#define GPIO_MODE_IT_RT 5 // Input mode trigger rising edge
-#define GPIO_MODE_IT_RFT 6 //Input mode trigger rising / falling edge
+#define GPIO_MODE_IT_FT 4 // Input mode trigger falling edge detection
+#define GPIO_MODE_IT_RT 5 // Input mode trigger rising edge detection
+#define GPIO_MODE_IT_RFT 6 //Input mode trigger rising / falling edge detection
 
 
 // GPIO pin possible output types @GPIO_PIN_OPTYPE
