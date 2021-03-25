@@ -1,4 +1,4 @@
-"Src/led_button_ext.o"
+"Src/button_interrupt.o"
 "Src/syscalls.o"
 "Src/sysmem.o"
 "Startup/startup_stm32l476rgtx.o"

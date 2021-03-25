@@ -66,6 +66,10 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle){
 		temp = 0;
 	}
 	else{
+		pGPIOHandle->pGPIOx->MODER &= ~( 0x3 << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber) ); // clearing register
+		pGPIOHandle->pGPIOx->MODER |= ( 0x0 << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber) ); // setting register
+
+
 		temp = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber % 32;
 
 		//interupt config part
@@ -128,7 +132,8 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle){
 			}
 		}
 
-		//2. configure the GPIO port selection in SYSCFG_EXTICR
+
+		 //2. configure the GPIO port selection in SYSCFG_EXTICR
 
 		uint8_t temp1 = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber /4;
 		uint8_t temp2 = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber %4;
@@ -139,16 +144,17 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle){
 
 		//3. enable the exti interrupt delivery using IMR - interrupt mask register
 
+		temp = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber %32;
+
 		if(pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber < 32){
-			EXTI->IMR1 |= 1 << temp;
+			EXTI->IMR1 |= 1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber;
 		}
 		else{
 			EXTI->IMR2 |= 1 << temp;
 		}
 
+		temp = 0;
 	}
-
-	//temp = 0;
 
 	// 2) configure the speed
 
@@ -168,7 +174,7 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle){
 
 	// 4) configure the out put type - optype
 
-	temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinOPType << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber); // multiplication by 2 for pin number means that mode register is 2 bit in size
+	temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinOPType << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
 	pGPIOHandle->pGPIOx->OTYPER &= ~( 0x1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber); // clearing register
 	pGPIOHandle->pGPIOx->OTYPER |= temp; // setting register
 
@@ -191,7 +197,6 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle){
 
 		temp = 0;
 	}
-
 }
 
 void GPIO_DeInit(GPIO_RegDef_t *pGPIOx){
@@ -390,10 +395,10 @@ void GPIO_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi){
 void GPIO_IRQPriorityConfig(uint8_t IRQNumber, uint8_t IRQPriority){
 	//1. find out ipr register
 	uint8_t iprx = IRQNumber / 4;
-	uint8_t iprx_serction = IRQNumber % 4;
+	uint8_t iprx_section = IRQNumber % 4;
 
-	uint8_t shift_amount = ( 8 *iprx_serction ) + ( 8 - NO_PR_BITS_IMPLEMENTED );
-	*(NVIC_PR_BASE_ADDR + ( iprx * 4) ) |= ( IRQPriority << shift_amount );
+	uint8_t shift_amount = ( 8 *iprx_section ) + ( 8 - NO_PR_BITS_IMPLEMENTED );
+	*(NVIC_PR_BASE_ADDR + iprx ) |= ( IRQPriority << shift_amount );
 
 }
 
