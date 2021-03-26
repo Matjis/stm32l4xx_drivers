@@ -7,10 +7,19 @@
 
 #include "stm32l476xx.h"
 #include "stdio.h"
+#include "string.h"
+
+void delay(void){
+	for(uint32_t i=0; i<250000; i++);
+}
 
 int main(void){
 
 	GPIO_Handle_t GpioLed, GpioExtButton, GpioButton;
+
+	memset(&GpioLed,0,sizeof(GpioLed));
+	memset(&GpioExtButton,0,sizeof(GpioExtButton));
+
 
 	//led config
 	GpioLed.pGPIOx = GPIOA;
@@ -26,7 +35,6 @@ int main(void){
 	GpioExtButton.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IT_FT;
 	GpioExtButton.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_HIGH;
 	GpioExtButton.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
-
 
 	//built in button config
 	GpioButton.pGPIOx = GPIOC;
@@ -57,6 +65,7 @@ int main(void){
 }
 
 void EXTI9_5_IRQHandler(void){
+	delay();
 	GPIO_IRQHandling(GPIO_PIN_NO_7);
 	GPIO_ToggleOutputPin(GPIOA, GPIO_PIN_NO_6);
 }
