@@ -39,7 +39,7 @@
 
 // ARM Cortex Mx Processor Priority register address calculation
 
-#define NVIC_PR_BASE_ADDR					( (__vo uint32_t*) 0xE000E400 )
+#define NVIC_PR_BASE_ADDR			( (__vo uint32_t*) 0xE000E400 )
 
 // ARM Cortex Mx Processor number of priority bits implemented in Priority register
 
@@ -122,6 +122,21 @@ typedef struct{
 	__vo uint32_t ASCR;
 
 }GPIO_RegDef_t;
+
+
+// Peripheral register definition structure for SPI
+
+typedef struct{
+
+	__vo uint32_t CR1; 											//Address offset 0x0000
+	__vo uint32_t CR2;											//Address offset 0x0400
+	__vo uint32_t SR;
+	__vo uint32_t DR;
+	__vo uint32_t CRCPR;
+	__vo uint32_t RXCRCR;
+	__vo uint32_t TXCRCR;
+
+}SPI_RegDef_t;
 
 
 // Peripheral register definition structure for Reset and clock control (RCC)
@@ -221,6 +236,10 @@ typedef struct{
 #define GPIOG						( (GPIO_RegDef_t*) GPIOG_BASEADDR)
 #define GPIOH						( (GPIO_RegDef_t*) GPIOH_BASEADDR)
 
+#define SPI1						( (SPI_RegDef_t*) SPI1_BASEADDR)
+#define SPI2						( (SPI_RegDef_t*) SPI2_BASEADDR)
+#define SPI3						( (SPI_RegDef_t*) SPI3_BASEADDR)
+
 #define RCC							( (RCC_RegDef_t*) RCC_BASEADDR)
 
 #define EXTI						( (EXTI_RegDef_t*) EXTI_BASEADDR)
@@ -271,7 +290,7 @@ typedef struct{
 
 
 // Clock disable macros for GPIOx peripherals
-/*
+
 #define GPIOA_PCLK_DI()		( RCC->AHB2ENR &= ~( 1 << 0 ) )
 #define GPIOB_PCLK_DI()		( RCC->AHB2ENR &= ~( 1 << 1 ) )
 #define GPIOC_PCLK_DI()		( RCC->AHB2ENR &= ~( 1 << 2 ) )
@@ -280,7 +299,7 @@ typedef struct{
 #define GPIOF_PCLK_DI()		( RCC->AHB2ENR &= ~( 1 << 5 ) )
 #define GPIOG_PCLK_DI()		( RCC->AHB2ENR &= ~( 1 << 6 ) )
 #define GPIOH_PCLK_DI()		( RCC->AHB2ENR &= ~( 1 << 7 ) )
-*/
+
 
 // Clock disable macros for I2Cx peripherals
 
@@ -314,14 +333,21 @@ typedef struct{
 
 //Macro to reset GPIOx peripheral
 
-#define GPIA_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 0 ) );   ( RCC->AHB2RSTR &= ~( 1 << 0 ) ); } while(0)
-#define GPIB_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 1 ) );   ( RCC->AHB2RSTR &= ~( 1 << 1 ) ); } while(0)
-#define GPIC_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 2 ) );   ( RCC->AHB2RSTR &= ~( 1 << 2 ) ); } while(0)
-#define GPID_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 3 ) );   ( RCC->AHB2RSTR &= ~( 1 << 3 ) ); } while(0)
-#define GPIE_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 4 ) );   ( RCC->AHB2RSTR &= ~( 1 << 4 ) ); } while(0)
-#define GPIF_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 5 ) );   ( RCC->AHB2RSTR &= ~( 1 << 5 ) ); } while(0)
-#define GPIG_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 6 ) );   ( RCC->AHB2RSTR &= ~( 1 << 6 ) ); } while(0)
-#define GPIH_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 7 ) );   ( RCC->AHB2RSTR &= ~( 1 << 7 ) ); } while(0)
+#define GPIOA_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 0 ) );   ( RCC->AHB2RSTR &= ~( 1 << 0 ) ); } while(0)
+#define GPIOB_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 1 ) );   ( RCC->AHB2RSTR &= ~( 1 << 1 ) ); } while(0)
+#define GPIOC_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 2 ) );   ( RCC->AHB2RSTR &= ~( 1 << 2 ) ); } while(0)
+#define GPIOD_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 3 ) );   ( RCC->AHB2RSTR &= ~( 1 << 3 ) ); } while(0)
+#define GPIOE_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 4 ) );   ( RCC->AHB2RSTR &= ~( 1 << 4 ) ); } while(0)
+#define GPIOF_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 5 ) );   ( RCC->AHB2RSTR &= ~( 1 << 5 ) ); } while(0)
+#define GPIOG_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 6 ) );   ( RCC->AHB2RSTR &= ~( 1 << 6 ) ); } while(0)
+#define GPIOH_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 7 ) );   ( RCC->AHB2RSTR &= ~( 1 << 7 ) ); } while(0)
+
+
+//Macro to reset SPIx peripheral
+
+#define SPI1_REG_RESET()	do { (RCC->APB2RSTR |= ( 1 << 12 ) );   ( RCC->APB2RSTR &= ~( 1 << 12 ) ); } while(0)
+#define SPI2_REG_RESET()	do { (RCC->APB1RSTR1 |= ( 1 << 14 ) );   ( RCC->APB1RSTR1 &= ~( 1 << 14 ) ); } while(0)
+#define SPI3_REG_RESET()	do { (RCC->APB1RSTR1 |= ( 1 << 15 ) );   ( RCC->APB1RSTR1 &= ~( 1 << 15 ) ); } while(0)
 
 
 //Return port code for given GPIOx base address
@@ -362,7 +388,59 @@ typedef struct{
 #define RESET 				DISABLE
 #define GPIO_PIN_SET 		SET
 #define GPIO_PIN_RESET 		RESET
+#define FLAG_RESET			RESET
+#define FLAG_SET			SET
+
+
+//Bit possition definiton for SPI_CR1
+
+#define SPI_CR1_CPHA		0
+#define SPI_CR1_CPOL		1
+#define SPI_CR1_MSTR		2
+#define SPI_CR1_BR			3
+#define SPI_CR1_SPE			6
+#define SPI_CR1_LSBFIRST	7
+#define SPI_CR1_SSI			8
+#define SPI_CR1_SSM			9
+#define SPI_CR1_RXONLY		10
+#define SPI_CR1_CRCL		11
+#define SPI_CR1_CRCNEXT		12
+#define SPI_CR1_CRCEN		13
+#define SPI_CR1_BIDIOE		14
+#define SPI_CR1_BIDIMODE	15
+
+
+//Bit possition definiton for SPI_CR2
+
+#define SPI_CR2_RXDMAEN		0
+#define SPI_CR2_TXDMAEN		1
+#define SPI_CR2_SSOE		2
+#define SPI_CR2_NSSP		3
+#define SPI_CR2_FRF			4
+#define SPI_CR2_ERRIE		5
+#define SPI_CR2_RXNEIE		6
+#define SPI_CR2_TXEIE		7
+#define SPI_CR2_DS			8
+#define SPI_CR2_FRXTH		12
+#define SPI_CR2_LDMA_RX		13
+#define SPI_CR2_LDMA_TX		14
+
+
+//Bit possition definiton for SPI_SR
+
+#define SPI_SR_RXNE			0
+#define SPI_SR_TXE			1
+#define SPI_SR_CRCERR		4
+#define SPI_SR_MODF			5
+#define SPI_SR_OVR			6
+#define SPI_SR_BSY			7
+#define SPI_SR_FRE			8
+#define SPI_SR_FRLVL		9
+#define SPI_SR_FTLVL		11
+
+
 
 #include "stm32l476xx_gpio_driver.h"
+#include "stm32l476xx_spi_driver.h"
 
 #endif /* INC_STM32L476XX_H_ */

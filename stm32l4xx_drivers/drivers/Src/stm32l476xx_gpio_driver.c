@@ -57,6 +57,10 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle){
 
 	uint32_t temp=0; // temp register
 
+	// Enable peripheral clock
+
+	GPIO_PeriClockControl(pGPIOHandle->pGPIOx, ENABLE);
+
 	// 1) configure the input mode
 
 	if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode <= GPIO_MODE_ANALOG){
@@ -67,7 +71,7 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle){
 	}
 	else{
 		pGPIOHandle->pGPIOx->MODER &= ~( 0x3 << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber) ); // clearing register
-		pGPIOHandle->pGPIOx->MODER |= ( 0x0 << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber) ); // setting register
+		//pGPIOHandle->pGPIOx->MODER |= ( 0x0 << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber) ); // setting register
 
 
 		temp = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber % 32;
@@ -200,7 +204,7 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle){
 }
 
 void GPIO_DeInit(GPIO_RegDef_t *pGPIOx){
-	/*
+
 	if(pGPIOx == GPIOA){
 		GPIOA_REG_RESET();
 	}
@@ -224,7 +228,7 @@ void GPIO_DeInit(GPIO_RegDef_t *pGPIOx){
 	}
 	else if(pGPIOx == GPIOH){
 		GPIOH_REG_RESET();
-	}*/
+	}
 }
 
 /*********************************************************************
@@ -417,6 +421,16 @@ void GPIO_IRQHandling(uint8_t PinNumber){
 			//clear
 			EXTI->PR2 |= ( 1 << temp );
 		}
+	}
+
+}
+
+void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi){
+	if(EnorDi == ENABLE){
+		pSPIx->CR1 |= ( 1 << SPI_CR1_SPE);
+	}
+	else{
+		pSPIx->CR1 &= ~( 1 << SPI_CR1_SPE);
 	}
 
 }
