@@ -278,11 +278,11 @@ uint16_t GPIO_ReadFromInputPort(GPIO_RegDef_t *pGPIOx){
  *
  * @brief             - This function writes value to GPIO pin
  *
- * @param[in]         - base address of the gpio peripheral
- * @param[in]         - pinNumber macros
- * @param[in]         -
+ * @param[in]         - base address of the gpio peripheral - GPIOx (x = A-F)
+ * @param[in]         - pinNumber macros - GPIO_PIN_NO_x (x = 0-15)
+ * @param[in]         - output value (1 or 0)
  *
- * @return            -  0 or 1
+ * @return            -  void
  *
  * @Note              -  none
  */
@@ -421,16 +421,6 @@ void GPIO_IRQHandling(uint8_t PinNumber){
 			//clear
 			EXTI->PR2 |= ( 1 << temp );
 		}
-	}
-
-}
-
-void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi){
-	if(EnorDi == ENABLE){
-		pSPIx->CR1 |= ( 1 << SPI_CR1_SPE);
-	}
-	else{
-		pSPIx->CR1 &= ~( 1 << SPI_CR1_SPE);
 	}
 
 }

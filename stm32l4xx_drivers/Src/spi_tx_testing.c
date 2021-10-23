@@ -51,7 +51,7 @@ void SPI2_Inits(void){
 	SPI2handle.SPIConfig.SPI_DeviceMode = SPI_DEVICE_MODE_MASTER;
 	SPI2handle.SPIConfig.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV2;
 	SPI2handle.SPIConfig.SPI_CRCL = SPI_CRCN_8BITS;
-	SPI2handle.SPIConfig.SPI_CPOL = SPI_CPOL_LOW;
+	SPI2handle.SPIConfig.SPI_CPOL = SPI_CPOL_HIGH;
 	SPI2handle.SPIConfig.SPI_CPHA = SPI_CPHA_LOW;
 	SPI2handle.SPIConfig.SPI_SSM = SPI_SSM_EN; // software slave managment for NSS enabled
 
@@ -69,11 +69,20 @@ int main(){
 	//this funcktion is needed to set up and initialize SPI2 peripheral parameters
 	SPI2_Inits();
 
+	//this makes NSS signal internally high and avoids MODF error
+	SPI_SSIConfig(SPI2, ENABLE);
+
 	//enable SPI2 peripheral
 	SPI_PeripheralControl(SPI2, ENABLE);
 
 	//to send data
 	SPI_SendData(SPI2, (uint8_t* )user_data, strlen(user_data) );
+
+	//confirmes SPI is not busy
+	while( SPI_GetFlagStatus(SPI2, SPI_BUSY_FLAG) );
+
+	//disable SPI2 peripheral
+	SPI_PeripheralControl(SPI2, DISABLE);
 
 	while(1);
 

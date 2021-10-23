@@ -52,7 +52,7 @@
 #define SRAM1_BASEADDR				0x20000000U
 #define SRAM2_BASEADDR				0x10000000U
 #define	SYS MEM						0x1FFF0000U
-#define SRAM 						SRAM1-BASEADDR
+#define SRAM 						SRAM1_BASEADDR
 
 
 //AHBx and PBx Bus peripheral base addresses
@@ -108,8 +108,8 @@
 
 typedef struct{
 
-	__vo uint32_t MODER; 											//Address offset 0x0000
-	__vo uint32_t OTYPER;											//Address offset 0x0400
+	__vo uint32_t MODER; 											//Address offset 0x00
+	__vo uint32_t OTYPER;											//Address offset 0x04
 	__vo uint32_t OSPEEDR;
 	__vo uint32_t PUPDR;
 	__vo uint32_t IDR;
@@ -128,8 +128,8 @@ typedef struct{
 
 typedef struct{
 
-	__vo uint32_t CR1; 											//Address offset 0x0000
-	__vo uint32_t CR2;											//Address offset 0x0400
+	__vo uint32_t CR1; 											//Address offset 0x00
+	__vo uint32_t CR2;											//Address offset 0x04
 	__vo uint32_t SR;
 	__vo uint32_t DR;
 	__vo uint32_t CRCPR;

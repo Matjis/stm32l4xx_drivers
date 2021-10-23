@@ -9,4 +9,3 @@ stm32l476xx_gpio_driver.c:333:6:GPIO_ToggleOutputPin	16	static
 stm32l476xx_gpio_driver.c:351:6:GPIO_IRQInterruptConfig	16	static
 stm32l476xx_gpio_driver.c:399:6:GPIO_IRQPriorityConfig	24	static
 stm32l476xx_gpio_driver.c:409:6:GPIO_IRQHandling	24	static
-stm32l476xx_gpio_driver.c:428:6:SPI_PeripheralControl	16	static
