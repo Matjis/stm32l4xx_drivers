@@ -363,8 +363,7 @@ typedef struct{
 
 
 /*Interrupt request (IRQ) numbers for this MCU. Can be seen in vector table.
- * For now here are only EXTI
- */
+*/
 
 #define IRQ_NO_EXTI0		6
 #define IRQ_NO_EXTI1		7
@@ -373,6 +372,11 @@ typedef struct{
 #define IRQ_NO_EXTI4		10
 #define IRQ_NO_EXTI9_5		23
 #define IRQ_NO_EXTI15_10	40
+
+#define IRQ_NO_SPI1			35
+#define IRQ_NO_SPI2			36
+#define IRQ_NO_SPI3			51
+
 
 //Macros for all the possible priority levels
 

@@ -171,30 +171,195 @@ int main(){
 		//enable SPI2 peripheral
 		SPI_PeripheralControl(SPI2, ENABLE);
 
-	  // 1. CMD_LED_CTRL
-
-		uint8_t commandcode = COMMAND_LED_CTRL;
 		uint8_t ackbyte;
 		uint8_t args[2];
+		uint8_t commandcode;
 
-		// Send command
-		SPI_SendData(SPI2, &commandcode, 1);
 
-		// Do dummy read to clear the RXNE
-		SPI_ReceiveData(SPI2, &dummy_read, 1);
+	  // 1. CMD_LED_CTRL < pin no (1) > < value (1) >
 
-		// send some dummy bits (1 byte) to fetch the response from the slave
-		SPI_SendData(SPI2, &dummy_write , 1);
+			commandcode = COMMAND_LED_CTRL;
 
-		SPI_ReceiveData(SPI2, &ackbyte, 1);
+			// Send command
+			SPI_SendData(SPI2, &commandcode, 1);
 
-		if (SPI_VerifyResponse(ackbyte) ){
+			// Do dummy read to clear the RXNE
+			SPI_ReceiveData(SPI2, &dummy_read, 1);
 
-			// Send arguments
-			args[0] = LED_PIN;
-			args[1] = LED_ON;
-			SPI_SendData(SPI2, args , 2);
-		}
+			// send some dummy bits (1 byte) to fetch the response from the slave
+			SPI_SendData(SPI2, &dummy_write , 1);
+
+			SPI_ReceiveData(SPI2, &ackbyte, 1);
+
+			if (SPI_VerifyResponse(ackbyte) ){
+
+				// Set arguments
+				args[0] = LED_PIN;
+				args[1] = LED_ON;
+
+				// Send arguments
+				SPI_SendData(SPI2, args , 2);
+			}
+
+
+
+		// 2. CMD_SENSOR_READ < pin no (1) >
+
+			while( GPIO_ReadFromInputPin(GPIOA, GPIO_PIN_NO_7) );
+
+			delay();
+
+			// Store analog value from A0 pin
+			uint8_t analog_read;
+
+			commandcode = COMMAND_SENSOR_READ;
+
+			// Send command
+			SPI_SendData(SPI2, &commandcode, 1);
+
+			// Do dummy read to clear the RXNE
+			SPI_ReceiveData(SPI2, &dummy_read, 1);
+
+			// send some dummy bits (1 byte) to fetch the response from the slave
+			SPI_SendData(SPI2, &dummy_write , 1);
+
+			SPI_ReceiveData(SPI2, &ackbyte, 1);
+
+			if (SPI_VerifyResponse(ackbyte) ){
+
+				// Set arguments
+				args[0] = ANALOG_PIN0;
+
+				// Send arguments
+				SPI_SendData(SPI2, args , 1);
+			}
+
+			// Do dummy read to clear the RXNE
+			SPI_ReceiveData(SPI2, &dummy_read, 1);
+
+			delay();
+
+			// Send some dummy bits (1 byte) to fetch the response from the slave
+			SPI_SendData(SPI2, &dummy_write , 1);
+
+			// Receive analog value from arduino
+			SPI_ReceiveData(SPI2, &analog_read, 1);
+
+
+
+		// 3. CMD_LED_READ < pin no (1) >
+
+			while( GPIO_ReadFromInputPin(GPIOA, GPIO_PIN_NO_7) );
+
+			delay();
+
+			// Store led pin status on arduino
+			uint8_t led_status;
+
+			commandcode = COMMAND_LED_READ;
+
+			// Send command
+			SPI_SendData(SPI2, &commandcode, 1);
+
+			// Do dummy read to clear the RXNE
+			SPI_ReceiveData(SPI2, &dummy_read, 1);
+
+			// send some dummy bits (1 byte) to fetch the response from the slave
+			SPI_SendData(SPI2, &dummy_write , 1);
+
+			SPI_ReceiveData(SPI2, &ackbyte, 1);
+
+			if (SPI_VerifyResponse(ackbyte) ){
+
+				// Set arguments
+				args[0] = LED_PIN;
+
+				// Send arguments
+				SPI_SendData(SPI2, args , 1);
+			}
+
+			// Do dummy read to clear the RXNE
+			SPI_ReceiveData(SPI2, &dummy_read, 1);
+
+			delay();
+
+			// Send some dummy bits (1 byte) to fetch the response from the slave
+			SPI_SendData(SPI2, &dummy_write , 1);
+
+			// Receive analog value from arduino
+			SPI_ReceiveData(SPI2, &led_status, 1);
+
+
+
+		// 4. CMD_PRINT < len (1) > < text >
+
+			while( GPIO_ReadFromInputPin(GPIOA, GPIO_PIN_NO_7) );
+
+			delay();
+
+			commandcode = COMMAND_PRINT;
+
+			// Send command
+			SPI_SendData(SPI2, &commandcode, 1);
+
+			// Do dummy read to clear the RXNE
+			SPI_ReceiveData(SPI2, &dummy_read, 1);
+
+			// send some dummy bits (1 byte) to fetch the response from the slave
+			SPI_SendData(SPI2, &dummy_write , 1);
+
+			SPI_ReceiveData(SPI2, &ackbyte, 1);
+
+			if (SPI_VerifyResponse(ackbyte) ){
+
+				// Set arguments
+				char *message = "Hello";
+				args[0] = strlen(message);
+
+				// Send arguments
+				SPI_SendData(SPI2, args , 1);
+				SPI_ReceiveData(SPI2, &dummy_read, 1);
+
+				SPI_SendData(SPI2, message , args[0]);
+			}
+
+
+
+		// 5. CMD_ID_READ
+
+			while( GPIO_ReadFromInputPin(GPIOA, GPIO_PIN_NO_7) );
+
+			delay();
+
+			// Store led pin status on arduino
+			uint8_t arduino_id[10];
+
+			commandcode = COMMAND_ID_READ;
+
+			// Send command
+			SPI_SendData(SPI2, &commandcode, 1);
+
+			// Do dummy read to clear the RXNE
+			SPI_ReceiveData(SPI2, &dummy_read, 1);
+
+			// send some dummy bits (1 byte) to fetch the response from the slave
+			SPI_SendData(SPI2, &dummy_write , 1);
+
+			SPI_ReceiveData(SPI2, &ackbyte, 1);
+
+			if (SPI_VerifyResponse(ackbyte) ){
+
+				for(int i = 0; i < 10; i++){
+
+					// Send some dummy bits (1 byte) to fetch the response from the slave
+				SPI_SendData(SPI2, &dummy_write , 1);
+
+				// Receive analog value from arduino
+				SPI_ReceiveData(SPI2, &arduino_id[i], 1);
+				}
+			}
+
+
 
 		//confirms SPI is not busy
 		while( SPI_GetFlagStatus(SPI2, SPI_BUSY_FLAG) );

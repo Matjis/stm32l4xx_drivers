@@ -15,13 +15,13 @@
 
 typedef struct{
 
-	uint8_t SPI_DeviceMode;
-	uint8_t SPI_BusConfig;
-	uint8_t SPI_SclkSpeed;
-	uint8_t SPI_CRCL;
-	uint8_t SPI_CPOL;
-	uint8_t SPI_CPHA;
-	uint8_t SPI_SSM;
+	uint8_t 	SPI_DeviceMode;
+	uint8_t 	SPI_BusConfig;
+	uint8_t 	SPI_SclkSpeed;
+	uint8_t 	SPI_CRCL;
+	uint8_t 	SPI_CPOL;
+	uint8_t 	SPI_CPHA;
+	uint8_t 	SPI_SSM;
 
 }SPI_Config_t;
 
@@ -30,10 +30,21 @@ typedef struct{
 
 typedef struct{
 
-	SPI_RegDef_t *pSPIx;   		// Pointer to hold the base address of the SPIx (x: 0,1,2) port to which pin it belongs
-	SPI_Config_t SPIConfig;		// This holds SPI pin config settings
+	SPI_RegDef_t 	*pSPIx;   		// Pointer to hold the base address of the SPIx (x: 0,1,2) port to which pin it belongs
+	SPI_Config_t 	SPIConfig;		// This holds SPI pin config settings
+	uint8_t			*pTXBuffer;		// To store the app. TX Buffer address
+	uint8_t			*pRXBuffer;		// To store the app. RX Buffer address
+	uint32_t		TXLen;			// To store TX Length
+	uint32_t		RXLen;			// To store RX Length
+	uint8_t			TXState;		// To store TX State
+	uint8_t			RXState;		// To store RX State
 
 }SPI_Handle_t;
+
+// SPI application states
+#define SPI_READY			0
+#define SPI_BUSY_IN_RX		1
+#define SPI_BUSY_IN_TX		2
 
 
 // @SPI_DeviceMode
@@ -106,6 +117,9 @@ void SPI_DeInit(SPI_RegDef_t *pSPIx);
 void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTXBuffer, uint32_t Len);
 void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRXBuffer, uint32_t Len);
 
+//Data read and write based on Interrupt
+uint8_t SPI_SendDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pTXBuffer, uint32_t Len);
+uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRXBuffer, uint32_t Len);
 
 //IRQ configuration and ISR handling
 void SPI_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi);

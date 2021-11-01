@@ -70,7 +70,7 @@ void SPI_Init(SPI_Handle_t *pSPIHandle){
 		// 3. configure the SPI serial clock speed (baud rate)
 		tempreg |= pSPIHandle->SPIConfig.SPI_SclkSpeed << SPI_CR1_BR;
 
-		// 4. configure the DFF
+		// 4. configure the CRCL (DFF)
 		tempreg |= pSPIHandle->SPIConfig.SPI_CRCL << SPI_CR1_CRCL;
 
 		// 5. configure the CPOL
@@ -124,8 +124,17 @@ void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTXBuffer, uint32_t Len){
 			else{
 				// 8 bit CRCL
 
-				// 1. load the data in to the DR
-				pSPIx->DR = *pTXBuffer;
+				/* 1. load the data in to the DR.
+				   pSPIx->DR needs to be casted to 8 bit size, otherwise it sends 16 bits.
+				*/
+				*((uint8_t*) &pSPIx->DR) = *pTXBuffer;
+				//*((uint8_t*) &pSPIx->DR) = *((uint8_t*)pTXBuffer); // alternative option
+
+				/* 2. because 8 bits are used FIFO reception threshold needs to be changed to
+					1/4 as explained in SPI CR2 register for FRXTH bit. If this isn't done
+					SPI_GetFlagStatus() function goes into loop, because of 16 bit threshold.
+				*/
+				pSPIx->CR2 |= ( 1 << 12 );
 
 				Len--;
 
@@ -158,7 +167,7 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRXBuffer, uint32_t Len){
 			// 8 bit CRCL
 
 			// 1. load the data in to the DR
-			 *(pRXBuffer ) = pSPIx->DR;
+			*(pRXBuffer) = pSPIx->DR ;
 
 			Len--;
 
@@ -169,12 +178,11 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRXBuffer, uint32_t Len){
 
 
 /*********************************************************************
- * @fn      		  - GPIO_IRQInterruptConfig
+ * @fn      		  - SPI_IRQInterruptConfig
  *
  * @brief             - This function does IRQ configuration and ISR handling
  *
- * @param[in]         - IRQ number from vector table for specific EXTI line
- * @param[in]         -
+ * @param[in]         - IRQ number from vector table for specific SPI line
  *
  * @return            -  0 or 1
  *
@@ -183,15 +191,43 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRXBuffer, uint32_t Len){
 
 void SPI_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi){
 
+	if(EnorDi == ENABLE){
+		if (IRQNumber <= 31){
+			//program ISER0 reg
+			*NVIC_ISER0	|= (1 << IRQNumber);
+		}
+		else if (IRQNumber > 31 && IRQNumber < 64){ // 32 to 64
+			//program ISER1 reg
+			*NVIC_ISER1	|= (1 << IRQNumber % 32);
+		}
+		else if (IRQNumber > 64 && IRQNumber < 96){
+			//program ISER2 reg
+			*NVIC_ISER2	|= (1 << IRQNumber % 64);
+		}
+	}
+	else{
+		if (IRQNumber <= 31){
+			//program ISER0 reg
+			*NVIC_ICER0	|= (1 << IRQNumber);
+		}
+		else if (IRQNumber > 31 && IRQNumber < 64){ // 32 to 64
+			//program ISER1 reg
+			*NVIC_ICER1	|= (1 << IRQNumber % 32);
+		}
+		else if (IRQNumber > 64 && IRQNumber < 96){
+			//program ISER2 reg
+			*NVIC_ICER2	|= (1 << IRQNumber % 64);
+		}
+	}
 }
 
+
 /*********************************************************************
- * @fn      		  - GPIO_IRQPriorityConfig
+ * @fn      		  - SPI_IRQPriorityConfig
  *
  * @brief             - This function does IRQ Priority configuration
  *
- * @param[in]         - IRQ number from vector table for specific EXTI line
- * @param[in]         -
+ * @param[in]         - IRQ number from vector table for specific SPI line
  *
  * @return            -  0 or 1
  *
@@ -202,10 +238,17 @@ void SPI_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi){
 
 void SPI_IRQPriorityConfig(uint8_t IRQNumber, uint8_t IRQPriority){
 
+	//1. find out ipr register
+	uint8_t iprx = IRQNumber / 4;
+	uint8_t iprx_section = IRQNumber % 4;
+
+	uint8_t shift_amount = ( 8 *iprx_section ) + ( 8 - NO_PR_BITS_IMPLEMENTED );
+	*(NVIC_PR_BASE_ADDR + iprx ) |= ( IRQPriority << shift_amount );
 }
 
 
 void SPI_IRQHandling(SPI_Handle_t *pHandle){
+
 
 }
 
@@ -250,4 +293,45 @@ uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx, uint32_t FlagName){
 	}
 
 	return FLAG_RESET;
+}
+
+uint8_t SPI_SendDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pTXBuffer, uint32_t Len){
+
+	uint8_t state = pSPIHandle->TXState;
+
+	if( state != SPI_BUSY_IN_TX){
+		// 1
+		pSPIHandle->pTXBuffer = pTXBuffer;
+		pSPIHandle->TXLen = Len;
+
+		// 2
+		pSPIHandle->TXState = SPI_BUSY_IN_TX;
+
+		// 3
+		pSPIHandle->pSPIx->CR2 |= ( 1 << SPI_CR2_TXEIE );
+	}
+	// 4
+
+	return state;
+
+}
+
+uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRXBuffer, uint32_t Len){
+
+	uint8_t state = pSPIHandle->RXState;
+
+	if( state != SPI_BUSY_IN_RX){
+		// 1
+		pSPIHandle->pRXBuffer = pRXBuffer;
+		pSPIHandle->RXLen = Len;
+
+		// 2
+		pSPIHandle->RXState = SPI_BUSY_IN_RX;
+
+		// 3
+		pSPIHandle->pSPIx->CR2 |= ( 1 << SPI_CR2_RXNEIE );
+	}
+	// 4
+
+	return state;
 }
