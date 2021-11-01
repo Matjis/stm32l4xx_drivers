@@ -164,14 +164,14 @@ Discarded input sections
                 0x0000000000000000      0x108 drivers/Src/stm32l476xx_spi_driver.o
  .text.SPI_IRQPriorityConfig
                 0x0000000000000000       0x5a drivers/Src/stm32l476xx_spi_driver.o
- .text.SPI_IRQHandling
-                0x0000000000000000       0x12 drivers/Src/stm32l476xx_spi_driver.o
  .text.SPI_SSIConfig
                 0x0000000000000000       0x36 drivers/Src/stm32l476xx_spi_driver.o
  .text.SPI_SendDataIT
                 0x0000000000000000       0x46 drivers/Src/stm32l476xx_spi_driver.o
  .text.SPI_ReceiveDataIT
                 0x0000000000000000       0x46 drivers/Src/stm32l476xx_spi_driver.o
+ .text.SPI_IRQHandling
+                0x0000000000000000       0x94 drivers/Src/stm32l476xx_spi_driver.o
  .debug_macro   0x0000000000000000      0xa60 drivers/Src/stm32l476xx_spi_driver.o
  .debug_macro   0x0000000000000000       0x22 drivers/Src/stm32l476xx_spi_driver.o
  .debug_macro   0x0000000000000000       0x8e drivers/Src/stm32l476xx_spi_driver.o
@@ -817,17 +817,17 @@ LOAD c:/st/stm32cubeide_1.4.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
                 0x000000000000014b       0x1e c:/st/stm32cubeide_1.4.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.4.0.202007081208/tools/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7e-m/crtn.o
 OUTPUT(stm32l4xx_drivers.elf elf32-littlearm)
 
-.debug_info     0x0000000000000000     0x1c4b
+.debug_info     0x0000000000000000     0x1cbb
  .debug_info    0x0000000000000000      0xd28 Src/spi_cmd_handling.o
  .debug_info    0x0000000000000d28       0x22 Startup/startup_stm32l476rgtx.o
  .debug_info    0x0000000000000d4a      0x7ca drivers/Src/stm32l476xx_gpio_driver.o
- .debug_info    0x0000000000001514      0x737 drivers/Src/stm32l476xx_spi_driver.o
+ .debug_info    0x0000000000001514      0x7a7 drivers/Src/stm32l476xx_spi_driver.o
 
-.debug_abbrev   0x0000000000000000      0x4fe
+.debug_abbrev   0x0000000000000000      0x542
  .debug_abbrev  0x0000000000000000      0x231 Src/spi_cmd_handling.o
  .debug_abbrev  0x0000000000000231       0x12 Startup/startup_stm32l476rgtx.o
  .debug_abbrev  0x0000000000000243      0x16a drivers/Src/stm32l476xx_gpio_driver.o
- .debug_abbrev  0x00000000000003ad      0x151 drivers/Src/stm32l476xx_spi_driver.o
+ .debug_abbrev  0x00000000000003ad      0x195 drivers/Src/stm32l476xx_spi_driver.o
 
 .debug_aranges  0x0000000000000000      0x178
  .debug_aranges
@@ -889,21 +889,21 @@ OUTPUT(stm32l4xx_drivers.elf elf32-littlearm)
  .debug_macro   0x00000000000023ec       0xa6 drivers/Src/stm32l476xx_gpio_driver.o
  .debug_macro   0x0000000000002492       0x9a drivers/Src/stm32l476xx_spi_driver.o
 
-.debug_line     0x0000000000000000     0x13c4
+.debug_line     0x0000000000000000     0x13e5
  .debug_line    0x0000000000000000      0x76a Src/spi_cmd_handling.o
  .debug_line    0x000000000000076a       0x84 Startup/startup_stm32l476rgtx.o
  .debug_line    0x00000000000007ee      0x626 drivers/Src/stm32l476xx_gpio_driver.o
- .debug_line    0x0000000000000e14      0x5b0 drivers/Src/stm32l476xx_spi_driver.o
+ .debug_line    0x0000000000000e14      0x5d1 drivers/Src/stm32l476xx_spi_driver.o
 
-.debug_str      0x0000000000000000     0xa5cd
+.debug_str      0x0000000000000000     0xa61d
  .debug_str     0x0000000000000000     0xa116 Src/spi_cmd_handling.o
                                        0xa375 (size before relaxing)
  .debug_str     0x000000000000a116       0x31 Startup/startup_stm32l476rgtx.o
                                          0x70 (size before relaxing)
  .debug_str     0x000000000000a147      0x351 drivers/Src/stm32l476xx_gpio_driver.o
                                        0x5fa6 (size before relaxing)
- .debug_str     0x000000000000a498      0x135 drivers/Src/stm32l476xx_spi_driver.o
-                                       0x5f0b (size before relaxing)
+ .debug_str     0x000000000000a498      0x185 drivers/Src/stm32l476xx_spi_driver.o
+                                       0x5f67 (size before relaxing)
 
 .comment        0x0000000000000000       0x7b
  .comment       0x0000000000000000       0x7b Src/spi_cmd_handling.o
@@ -911,8 +911,8 @@ OUTPUT(stm32l4xx_drivers.elf elf32-littlearm)
  .comment       0x000000000000007b       0x7c drivers/Src/stm32l476xx_gpio_driver.o
  .comment       0x000000000000007b       0x7c drivers/Src/stm32l476xx_spi_driver.o
 
-.debug_frame    0x0000000000000000      0x55c
+.debug_frame    0x0000000000000000      0x558
  .debug_frame   0x0000000000000000      0x134 Src/spi_cmd_handling.o
  .debug_frame   0x0000000000000134      0x1c8 drivers/Src/stm32l476xx_gpio_driver.o
- .debug_frame   0x00000000000002fc      0x234 drivers/Src/stm32l476xx_spi_driver.o
- .debug_frame   0x0000000000000530       0x2c c:/st/stm32cubeide_1.4.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.4.0.202007081208/tools/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m\libc_nano.a(lib_a-init.o)
+ .debug_frame   0x00000000000002fc      0x230 drivers/Src/stm32l476xx_spi_driver.o
+ .debug_frame   0x000000000000052c       0x2c c:/st/stm32cubeide_1.4.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.4.0.202007081208/tools/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m\libc_nano.a(lib_a-init.o)

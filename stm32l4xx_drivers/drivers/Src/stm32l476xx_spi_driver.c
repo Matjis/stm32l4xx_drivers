@@ -8,6 +8,9 @@
 
 #include "stm32l476xx_spi_driver.h"
 
+static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle);
+static void spi_rxne_interrupt_handle(SPI_Handle_t *pSPIHandle);
+static void spi_ovr_err_interrupt_handle(SPI_Handle_t *pSPIHandle);
 
 /*********************************************************************
  * @fn      		  - SPI_PeriClockControl
@@ -246,12 +249,6 @@ void SPI_IRQPriorityConfig(uint8_t IRQNumber, uint8_t IRQPriority){
 	*(NVIC_PR_BASE_ADDR + iprx ) |= ( IRQPriority << shift_amount );
 }
 
-
-void SPI_IRQHandling(SPI_Handle_t *pHandle){
-
-
-}
-
 void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi){
 
 	if(EnorDi == ENABLE){
@@ -335,3 +332,76 @@ uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRXBuffer, uint32_t
 
 	return state;
 }
+
+void SPI_IRQHandling(SPI_Handle_t *pHandle){
+
+	uint8_t temp1, temp2;
+	// Check for TXE
+	temp1 = pHandle->pSPIx->SR & ( 1 << SPI_SR_TXE ); // check if SR 1 possiton to the left is same with 1
+	temp2 = pHandle->pSPIx->CR2 & ( 1 << SPI_CR2_TXEIE );
+
+	if ( temp1 && temp2){
+
+		// Handle_TXE
+		spi_txe_interrupt_handle();
+	}
+
+	// Check for RXNE
+	temp1 = pHandle->pSPIx->SR & ( 1 << SPI_SR_RXNE ); // check if SR 1 possiton to the left is same with 0
+	temp2 = pHandle->pSPIx->CR2 & ( 1 << SPI_CR2_RXNEIE );
+
+	if ( temp1 && temp2){
+
+		// Handle_RXNE
+		spi_rxne_interrupt_handle();
+	}
+
+	// Check for OVR flag
+	temp1 = pHandle->pSPIx->SR & ( 1 << SPI_SR_OVR ); // check if SR 1 possiton to the left is same with 0
+	temp2 = pHandle->pSPIx->CR2 & ( 1 << SPI_CR2_ERRIE );
+
+	if ( temp1 && temp2){
+
+		// Handle_RXNE
+		spi_ovr_err_interrupt_handle();
+	}
+
+}
+
+// Some helper function implemantion
+
+static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle){
+
+	// check the DFF bit
+		if(pSPIHandle->pSPIx->CR1 & ( 1 << SPI_CR1_CRCL ) ){
+			// 16 bit CRCL
+
+			// 1. load the data in to the DR
+			pSPIHandle->pSPIx->DR = *( (uint16_t*) pSPIHandle->pTXBuffer);
+
+			pSPIHandle->TXLen--;
+			pSPIHandle->TXLen--;
+
+			(uint16_t*) pSPIHandle->pTXBuffer++;
+		}
+		else{
+			// 8 bit CRCL
+
+			*((uint8_t*) &pSPIHandle->pSPIx->DR) = pSPIHandle->pTXBuffer;
+			pSPIHandle->pSPIx->CR2 |= ( 1 << 12 );
+			pSPIHandle->TXLen--;
+			pSPIHandle->pTXBuffer++;
+		}
+
+		if( !pSPIHandle->TXLen ){
+
+			pSPIHandle->pSPIx->CR2 &= ~ ( 1 << SPI_CR2_TXEIE);
+			pSPIHandle->pTXBuffer = NULL;
+			pSPIHandle->TXLen = 0;
+			pSPIHandle->TXState = SPI_READY;
+			SPI_ApplicationEventCallback(pSPIHandle,SPI_EVENT_TX_CMPLT);
+		}
+
+}
+//static void spi_rxne_interrupt_handle(SPI_Handle_t *pSPIHandle);
+//static void spi_ovr_err_interrupt_handle(SPI_Handle_t *pSPIHandle);

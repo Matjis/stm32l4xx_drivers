@@ -8,6 +8,7 @@
 #ifndef INC_STM32L476XX_H_
 #define INC_STM32L476XX_H_
 
+#include <stddef.h>
 #include <stdint.h>
 
 #define __vo volatile
