@@ -163,7 +163,6 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRXBuffer, uint32_t Len){
 
 			Len--;
 			Len--;
-
 			(uint16_t*) pRXBuffer++;
 		}
 		else{
@@ -173,8 +172,7 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRXBuffer, uint32_t Len){
 			*(pRXBuffer) = pSPIx->DR ;
 
 			Len--;
-
-			 pRXBuffer++;
+			pRXBuffer++;
 		}
 	}
 }
@@ -403,5 +401,36 @@ static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle){
 		}
 
 }
-//static void spi_rxne_interrupt_handle(SPI_Handle_t *pSPIHandle);
+//static void spi_rxne_interrupt_handle(SPI_Handle_t *pSPIHandle){
+
+	// check the DFF bit
+		if(pSPIHandle->pSPIx->CR1 & ( 1 << SPI_CR1_CRCL ) ){
+			// 16 bit CRCL
+
+			// 1. load the data in to the DR from RXbuffer address
+			*( (uint16_t*) pSPIHandle->pTXBuffer) = pSPIHandle->pSPIx->DR;
+
+			pSPIHandle->RXLen--;
+			pSPIHandle->RXLen--;
+
+			(uint16_t*) pSPIHandle->pRXBuffer++;
+		}
+		else{
+			// 8 bit CRCL
+
+			pSPIHandle->pRXBuffer = pSPIHandle->pSPIx->DR;
+			pSPIHandle->RXLen--;
+			pSPIHandle->pRXBuffer++;
+		}
+
+		if( !pSPIHandle->RXLen ){
+
+			pSPIHandle->pSPIx->CR2 &= ~ ( 1 << SPI_CR2_RXNEIE);
+			pSPIHandle->pRXBuffer = NULL;
+			pSPIHandle->RXLen = 0;
+			pSPIHandle->RXState = SPI_READY;
+			SPI_ApplicationEventCallback(pSPIHandle,SPI_EVENT_RX_CMPLT);
+		}
+}
+
 //static void spi_ovr_err_interrupt_handle(SPI_Handle_t *pSPIHandle);
