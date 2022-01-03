@@ -12,7 +12,7 @@
 #include <stdint.h>
 
 #define __vo volatile
-
+#define __weak __attribute__((weak))
 
 // Processor specific details
 
@@ -56,7 +56,7 @@
 #define SRAM 						SRAM1_BASEADDR
 
 
-//AHBx and PBx Bus peripheral base addresses
+// AHBx and PBx Bus ral base addresses
 
 #define	PERIPH_BASE					0x40000000U
 #define APB1PERIPH_BASE				PERIPH_BASE
@@ -65,7 +65,7 @@
 #define AHB2PERIPH_BASE				0x48000000U
 
 
-// Base addresses of peripherals which are on APB1 bus
+// Base addresses of rals which are on APB1 bus
 
 #define I2C1_BASEADDR				(APB1PERIPH_BASE + 0x5400) //APB1 base address + offset
 #define I2C2_BASEADDR				(APB1PERIPH_BASE + 0x5800)
@@ -80,7 +80,7 @@
 #define I2C4_BASEADDR				(APB1PERIPH_BASE + 0x8400)
 
 
-// Base addresses of peripherals which are on APB2 bus
+// Base addresses of rails which are on APB2 bus
 
 #define SYSCFG_BASEADDR				(APB2PERIPH_BASE + 0x0000) //APB2 base address + offset
 #define EXTI_BASEADDR				(APB2PERIPH_BASE + 0x0400)
@@ -88,12 +88,12 @@
 #define SPI1_BASEADDR				(APB2PERIPH_BASE + 0x3000)
 
 
-// Base addresses of peripherals which are on AHB1 bus
+// Base addresses of rals which are on AHB1 bus
 
 #define RCC_BASEADDR				(AHB1PERIPH_BASE + 0x1000)
 
 
-// Base addresses of peripherals which are on AHB2 bus
+// Base addresses of rals which are on AHB2 bus
 
 #define GPIOA_BASEADDR				(AHB2PERIPH_BASE + 0x0000) //AHB2 base address + offset
 #define GPIOB_BASEADDR				(AHB2PERIPH_BASE + 0x0400)
@@ -105,7 +105,7 @@
 #define GPIOH_BASEADDR				(AHB2PERIPH_BASE + 0x1C00)
 
 
-// Peripheral register definition structure for GPIO
+// ral register definition structure for GPIO
 
 typedef struct{
 
@@ -125,7 +125,7 @@ typedef struct{
 }GPIO_RegDef_t;
 
 
-// Peripheral register definition structure for SPI
+// ral register definition structure for SPI
 
 typedef struct{
 
@@ -140,7 +140,26 @@ typedef struct{
 }SPI_RegDef_t;
 
 
-// Peripheral register definition structure for Reset and clock control (RCC)
+// ral register definition structure for I2C
+
+typedef struct{
+
+	__vo uint32_t CR1; 											//Address offset 0x00
+	__vo uint32_t CR2;											//Address offset 0x04
+	__vo uint32_t OAR1;
+	__vo uint32_t OAR2;
+	__vo uint32_t TIMINGR;
+	__vo uint32_t TIMEOUTR;
+	__vo uint32_t ISR;
+	__vo uint32_t ICR;
+	__vo uint32_t PECR;
+	__vo uint32_t RXDR;
+	__vo uint32_t TXDR;
+
+}I2C_RegDef_t;
+
+
+// ral register definition structure for Reset and clock control (RCC)
 
 typedef struct{
 
@@ -188,7 +207,7 @@ typedef struct{
 }RCC_RegDef_t;
 
 
-// Peripheral register definition structure for System configuration controller (SYSCFG)
+// ral register definition structure for System configuration controller (SYSCFG)
 
 typedef struct{
 
@@ -205,7 +224,7 @@ typedef struct{
 }SYSCFG_RegDef_t;
 
 
-// Peripheral register definition structure for external interrupt (EXTI)
+// ral register definition structure for external interrupt (EXTI)
 
 typedef struct{
 
@@ -226,7 +245,7 @@ typedef struct{
 
 
 
-// Peripheral definition ( Peripheral base addresses typecasted to xxx_RegDef_t)
+// ral definition ( ral base addresses typecasted to xxx_RegDef_t)
 
 #define GPIOA						( (GPIO_RegDef_t*) GPIOA_BASEADDR)
 #define GPIOB						( (GPIO_RegDef_t*) GPIOB_BASEADDR)
@@ -241,6 +260,10 @@ typedef struct{
 #define SPI2						( (SPI_RegDef_t*) SPI2_BASEADDR)
 #define SPI3						( (SPI_RegDef_t*) SPI3_BASEADDR)
 
+#define I2C1						( (I2C_RegDef_t*) I2C1_BASEADDR)
+#define I2C2						( (I2C_RegDef_t*) I2C2_BASEADDR)
+#define I2C3						( (I2C_RegDef_t*) I2C3_BASEADDR)
+
 #define RCC							( (RCC_RegDef_t*) RCC_BASEADDR)
 
 #define EXTI						( (EXTI_RegDef_t*) EXTI_BASEADDR)
@@ -248,7 +271,7 @@ typedef struct{
 #define SYSCFG						( (SYSCFG_RegDef_t*) SYSCFG_BASEADDR)
 
 
-// Clock enable macros for GPIOx peripherals
+// Clock enable macros for GPIOx rals
 
 #define GPIOA_PCLK_EN()		( RCC->AHB2ENR |= ( 1 << 0 ) )
 #define GPIOB_PCLK_EN()		( RCC->AHB2ENR |= ( 1 << 1 ) )
@@ -260,7 +283,7 @@ typedef struct{
 #define GPIOH_PCLK_EN()		( RCC->AHB2ENR |= ( 1 << 7 ) )
 
 
-// Clock enable macros for I2Cx peripherals
+// Clock enable macros for I2Cx rals
 
 #define I2C1_PCLK_EN()		( RCC->APB1ENR1 |= ( 1 << 21 ) )
 #define I2C2_PCLK_EN()		( RCC->APB1ENR1 |= ( 1 << 22 ) )
@@ -268,14 +291,14 @@ typedef struct{
 #define I2C4_PCLK_EN()		( RCC->APB1ENR2 |= ( 1 << 1 ) )
 
 
-// Clock enable macros for SPIx peripherals
+// Clock enable macros for SPIx rals
 
 #define SPI1_PCLK_EN()		( RCC->APB2ENR  |= ( 1 << 12 ) )
 #define SPI2_PCLK_EN()		( RCC->APB1ENR1 |= ( 1 << 14 ) )
 #define SPI3_PCLK_EN()		( RCC->APB1ENR1 |= ( 1 << 15 ) )
 
 
-// Clock enable macros for USARTx peripherals
+// Clock enable macros for USARTx rals
 
 #define USART1_PCLK_EN()	( RCC->APB2ENR  |= ( 1 << 14 ) )
 #define USART2_PCLK_EN()	( RCC->APB1ENR1 |= ( 1 << 17 ) )
@@ -285,12 +308,12 @@ typedef struct{
 #define LPUART1_PCLK_EN()	( RCC->APB1ENR2 |= ( 1 << 0 ) )
 
 
-// Clock enable macros for SYSCFGx peripherals
+// Clock enable macros for SYSCFGx rals
 
 #define SYSCFG_PCLK_EN()	( RCC->APB2ENR |= ( 1 << 0 ) )
 
 
-// Clock disable macros for GPIOx peripherals
+// Clock disable macros for GPIOx rals
 
 #define GPIOA_PCLK_DI()		( RCC->AHB2ENR &= ~( 1 << 0 ) )
 #define GPIOB_PCLK_DI()		( RCC->AHB2ENR &= ~( 1 << 1 ) )
@@ -302,7 +325,7 @@ typedef struct{
 #define GPIOH_PCLK_DI()		( RCC->AHB2ENR &= ~( 1 << 7 ) )
 
 
-// Clock disable macros for I2Cx peripherals
+// Clock disable macros for I2Cx rals
 
 #define I2C1_PCLK_DI()		( RCC->APB1ENR1 &= ~( 1 << 21 ) )
 #define I2C2_PCLK_DI()		( RCC->APB1ENR1 &= ~( 1 << 22 ) )
@@ -310,14 +333,14 @@ typedef struct{
 #define I2C4_PCLK_DI()		( RCC->APB1ENR2 &= ~( 1 << 1 ) )
 
 
-// Clock disable macros for SPIx peripherals
+// Clock disable macros for SPIx rals
 
 #define SPI1_PCLK_DI()		( RCC->APB2ENR  &= ~( 1 << 12 ) )
 #define SPI2_PCLK_DI()		( RCC->APB1ENR1 &= ~( 1 << 14 ) )
 #define SPI3_PCLK_DI()		( RCC->APB1ENR1 &= ~( 1 << 15 ) )
 
 
-// Clock disable macros for USARTx peripherals
+// Clock disable macros for USARTx rals
 
 #define USART1_PCLK_DI()	( RCC->APB2ENR  &= ~( 1 << 14 ) )
 #define USART2_PCLK_DI()	( RCC->APB1ENR1 &= ~( 1 << 17 ) )
@@ -327,12 +350,12 @@ typedef struct{
 #define LPUART1_PCLK_DI()	( RCC->APB1ENR2 &= ~( 1 << 0 ) )
 
 
-// Clock disable macros for SYSCFGx peripherals
+// Clock disable macros for SYSCFGx rals
 
 #define SYSCFG_PCLK_DI()	( RCC->APB2ENR &= ~( 1 << 0 ) )
 
 
-//Macro to reset GPIOx peripheral
+//Macro to reset GPIOx ral
 
 #define GPIOA_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 0 ) );   ( RCC->AHB2RSTR &= ~( 1 << 0 ) ); } while(0)
 #define GPIOB_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 1 ) );   ( RCC->AHB2RSTR &= ~( 1 << 1 ) ); } while(0)
@@ -344,7 +367,7 @@ typedef struct{
 #define GPIOH_REG_RESET()	do { (RCC->AHB2RSTR |= ( 1 << 7 ) );   ( RCC->AHB2RSTR &= ~( 1 << 7 ) ); } while(0)
 
 
-//Macro to reset SPIx peripheral
+//Macro to reset SPIx ral
 
 #define SPI1_REG_RESET()	do { (RCC->APB2RSTR |= ( 1 << 12 ) );   ( RCC->APB2RSTR &= ~( 1 << 12 ) ); } while(0)
 #define SPI2_REG_RESET()	do { (RCC->APB1RSTR1 |= ( 1 << 14 ) );   ( RCC->APB1RSTR1 &= ~( 1 << 14 ) ); } while(0)
@@ -397,6 +420,10 @@ typedef struct{
 #define FLAG_SET			SET
 
 
+/*
+ * Bit possition definiton for SPI
+ */
+
 //Bit possition definiton for SPI_CR1
 
 #define SPI_CR1_CPHA		0
@@ -444,8 +471,104 @@ typedef struct{
 #define SPI_SR_FTLVL		11
 
 
+/*
+ * Bit possition definiton for I2C
+ */
+
+//Bit possition definiton for I2C_CR1
+
+#define I2C_CR1_PE			0
+#define I2C_CR1_TXIE		1
+#define I2C_CR1_RXIE		2
+#define I2C_CR1_ADDRIE		3
+#define I2C_CR1_NACKIE		4
+#define I2C_CR1_STOPIE		5
+#define I2C_CR1_TCIE		6
+#define I2C_CR1_ERRIE		7
+#define I2C_CR1_DNF			8
+#define I2C_CR1_ANFOFF		12
+#define I2C_CR1_TXDMAEN		14
+#define I2C_CR1_RXDMAEN		15
+#define I2C_CR1_SBC			16
+#define I2C_CR1_NOSTRETCH	17
+#define I2C_CR1_WUPEN		18
+#define I2C_CR1_GCEN		19
+#define I2C_CR1_SMBHEN		20
+#define I2C_CR1_SMBDEN		21
+#define I2C_CR1_ALERTEN		22
+#define I2C_CR1_PECEN		23
+
+
+//Bit possition definiton for I2C_CR2
+
+#define I2C_CR2_SADD		0
+#define I2C_CR2_RD_WRN		10
+#define I2C_CR2_ADD10		11
+#define I2C_CR2_HEAD10R		12
+#define I2C_CR2_START		13
+#define I2C_CR2_STOP		14
+#define I2C_CR2_NACK		15
+#define I2C_CR2_NBYTES		16
+#define I2C_CR2_RELOAD		24
+#define I2C_CR2_AUTOEND		25
+#define I2C_CR2_PECBYTE		26
+
+
+//Bit possition definiton for I2C_TIMINGR
+
+#define I2C_TIMINGR_SCLL		0
+#define I2C_TIMINGR_SCLH		8
+#define I2C_TIMINGR_SDADEL		16
+#define I2C_TIMINGR_SCLDEL		20
+#define I2C_TIMINGR_PRESC		28
+
+
+//Bit possition definiton for I2C_TIMEOUTR
+
+#define I2C_TIMEOUTR_TIMEOUTA	0
+#define I2C_TIMEOUTR_TIDLE		12
+#define I2C_TIMEOUTR_TIMOUTEN	15
+#define I2C_TIMEOUTR_TIMEOUTB	16
+#define I2C_TIMEOUTR_TEXTEN		31
+
+
+//Bit possition definiton for I2C_ISR
+
+#define I2C_ISR_TXE			0
+#define I2C_ISR_TXIS		1
+#define I2C_ISR_RXNE		2
+#define I2C_ISR_ADDR		3
+#define I2C_ISR_NACKF		4
+#define I2C_ISR_STOPF		5
+#define I2C_ISR_TC			6
+#define I2C_ISR_TCR			7
+#define I2C_ISR_BERR		8
+#define I2C_ISR_ARLO		9
+#define I2C_ISR_OVR			10
+#define I2C_ISR_PECERR		11
+#define I2C_ISR_TIMEOUT		12
+#define I2C_ISR_ALERT		13
+#define I2C_ISR_BUSY		15
+#define I2C_ISR_DIR			16
+#define I2C_ISR_ADDCODE		17
+
+
+//Bit possition definiton for I2C_ICR
+
+#define I2C_ICR_ADDRCF		3
+#define I2C_ICR_NACKCF		4
+#define I2C_ICR_STOPCF		5
+#define I2C_ICR_BERRCF		8
+#define I2C_ICR_ARLOCF		9
+#define I2C_ICR_OVRCF		10
+#define I2C_ICR_PECCF		11
+#define I2C_ICR_TIMOUTCF	12
+#define I2C_ICR_ALERTCF		13
+
+
 
 #include "stm32l476xx_gpio_driver.h"
 #include "stm32l476xx_spi_driver.h"
+#include "stm32l476xx_i2c_driver.h"
 
 #endif /* INC_STM32L476XX_H_ */
